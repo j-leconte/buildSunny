@@ -3,7 +3,7 @@ Description and wild pokemons generator from database.
 
 Python source code, database file (.sqlite) and graphic interface file (.ui)
 
-You can replace the .py file by an executable to avoid having to download python libraries
+You can replace the .py file by an executable to avoid having to install python and the libraries
 
 (Exe available here : https://drive.google.com/open?id=1JulKzV_laHxMbzx4xJQq-IA_SAzD21bX)
 
