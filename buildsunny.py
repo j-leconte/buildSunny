@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         #Fill boxes
-        self.ui.continent.addItems(set([nom[0] for nom in c.execute("SELECT Continent FROM SunnyData_zone")])) #Fill continent box
+        self.ui.continent.addItems(self.unique([nom[0] for nom in c.execute("SELECT Continent FROM SunnyData_zones")])) #Fill continent box
         self.ui.getregion.clicked.connect(self.checkregion) #Fill region box
         self.ui.getzone.clicked.connect(self.checkzone) #Fill zone box
         self.ui.go.clicked.connect(self.maketext) #Go button effect
@@ -32,15 +32,15 @@ class MainWindow(QMainWindow):
 
     def checkregion(self):
         self.ui.region.clear()
-        c.execute('SELECT Region FROM SunnyData_zone WHERE Continent=?',(self.ui.continent.currentText(),))
+        c.execute('SELECT Region FROM SunnyData_zones WHERE Continent=?',(self.ui.continent.currentText(),))
         reg = c.fetchall()
-        reg2=set(reg)
+        reg2=self.unique(reg)
         for r in reg2:
             self.ui.region.addItem(r[0])
 
     def checkzone(self):
         self.ui.zone.clear()
-        c.execute('SELECT Zone FROM SunnyData_zone WHERE Region=?',(self.ui.region.currentText(),))
+        c.execute('SELECT Zone FROM SunnyData_zones WHERE Region=?',(self.ui.region.currentText(),))
         zone = c.fetchall()
         zone2=self.unique(zone)
         for z in zone2:
@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
 
     def maketext(self):
         self.ui.output.setPlainText('')
-        c.execute('SELECT * FROM SunnyData_zone WHERE Region=? AND Zone=?',(self.ui.region.currentText(),self.ui.zone.currentText()))
+        c.execute('SELECT * FROM SunnyData_zones WHERE Region=? AND Zone=?',(self.ui.region.currentText(),self.ui.zone.currentText()))
         zonedata = c.fetchone()
         if zonedata==None:
             msgBox1 = QMessageBox()
@@ -56,14 +56,17 @@ class MainWindow(QMainWindow):
             msgBox1.exec_()
         else:
             self.ui.output.appendPlainText("<div class='form_fond'><div class='secondlayer'><div class='form_titre_bg2'><div class='form_titredescri'><div class='form_titre_bg'>[size=12].: "+zonedata[3]+" :.[/size]</div></div></div>")
-            if zonedata[6]!=None:
-                self.ui.output.appendPlainText("<div class='soustitredescri'>[url="+zonedata[6]+"]Carte de la région[/url]</div>")
-            if zonedata[4]==None:
+            if zonedata[7]!=None:
+                self.ui.output.appendPlainText("<div class='soustitredescri'>[url="+zonedata[7]+"]Carte de la région[/url]</div>")
+            if zonedata[5]==None:
                 self.ui.output.appendPlainText("<div class='form_boite'><div class='form_boite_bg'>[i]\n"+"Description à faire !"+"[/i]")
             else:
-                self.ui.output.appendPlainText("<div class='form_boite'><div class='form_boite_bg'>[i]\n"+zonedata[4]+"\n[/i]")
+                if zonedata[4]==None:
+                    self.ui.output.appendPlainText("<div class='form_boite'><div class='form_boite_bg'>[i]\n"+zonedata[5]+"\n[/i]")
+                else:
+                    self.ui.output.appendPlainText("<div class='form_boite'><div class='form_boite_bg'>[center]"+zonedata[4]+"[/center]\n[i]"+zonedata[5]+"\n[/i]")
 
-            if zonedata[5]=="Oui":
+            if zonedata[6]=="Oui":
                 places = ()
                 c.execute('SELECT * FROM SunnyData_pokemon WHERE Zone=?',(zonedata[0],))
                 for subzone in c.fetchall():
